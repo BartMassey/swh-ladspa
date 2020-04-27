@@ -20,16 +20,20 @@
        is used.</p>
 
     <callback event="run"><![CDATA[
-      /* float u = 255.0; */
-      float uloginv = 0.09016844005556; /* 0.5 / log(1.0 + u) */
+      float u = 31.0;
+      float ufwd =  1.0 / log(1.0 + u);
+      float uback = 1.0 / u;
       unsigned long pos;
       for (pos = 0; pos < sample_count; pos++) {
           float s = input[pos];
           float sabs = fabs(s);
-          if (s >= 0)
-              s =  uloginv * log(1.0 + 255.0 * sabs);
+          sabs = ufwd * log(1.0 + u * sabs);
+          sabs = floor(u * sabs) / u;
+          sabs = uback * (pow(u + 1.0, sabs) - 1.0);
+          if (s < 0.0)
+              s = -sabs;
           else
-              s = -uloginv * log(1.0 + 255.0 * sabs);
+              s = sabs;
           buffer_write(output[pos], s);
       }
     ]]></callback>
